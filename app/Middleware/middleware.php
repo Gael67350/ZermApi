@@ -1,6 +1,6 @@
 <?php
 
-use \App\Handlers\ErrorHandler;
+use \App\Handler\ErrorHandler;
 use \App\Middleware\SetContentTypeToJsonMiddleware;
 use \Slim\Middleware\JwtAuthentication;
 

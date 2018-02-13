@@ -1,6 +1,6 @@
 <?php
 
-use \App\Handlers\ErrorHandler;
+use \App\Handler\ErrorHandler;
 
 $container = $app->getContainer();
 

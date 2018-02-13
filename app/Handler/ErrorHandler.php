@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Handlers;
+namespace App\Handler;
 
 
 use Psr\Http\Message\ResponseInterface;
@@ -24,7 +24,7 @@ class ErrorHandler extends AbstractHandler {
         self::STATUS_SUCCESS => "OK",
 
         self::STATUS_BAD_REQUEST => "Bad request",
-        self::STATUS_UNAUTHORIZED => "Authentication is required to access this resource",
+        self::STATUS_UNAUTHORIZED => "Authentication is required to access to this resource",
         self::STATUS_FORBIDDEN => "Access forbidden",
         self::STATUS_NOT_FOUND => "Resource not found",
         self::STATUS_IM_A_TEAPOT => "I'm a teapot",
