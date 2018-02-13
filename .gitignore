@@ -1,4 +1,4 @@
 /vendor/
 /*.iml
 /.idea/
-/app/config/config.php
+/Config/config.php

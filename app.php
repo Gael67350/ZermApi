@@ -1,6 +1,6 @@
 <?php
 
-$config = include(__DIR__ . "/app/config/config.php");
+$config = include(__DIR__ . "/app/Config/config.php");
 
 date_default_timezone_set($config['app']['timezone']);
 
@@ -15,8 +15,8 @@ $app = new Slim\App([
     ]
 ]);
 
-require __DIR__ . "/app/handlers/error.php";
+require __DIR__ . "/app/Handler/error.php";
 
-require __DIR__ . "/app/middleware/middleware.php";
+require __DIR__ . "/app/Middleware/middleware.php";
 
 $app->run();

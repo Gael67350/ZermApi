@@ -5,7 +5,8 @@
     "require": {
         "slim/slim": "^3.9",
         "tuupola/slim-jwt-auth": "^2.3",
-        "cakephp/orm": "^3.5"
+        "cakephp/orm": "^3.5",
+        "blake-gardner/mac-address": "^2.1"
     },
     "license": "MIT",
     "authors": [
