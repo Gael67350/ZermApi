@@ -16,7 +16,8 @@ class Device extends Entity {
 
     protected $_hidden = [
         'security_token',
-        'macAddress'
+        'macAddress',
+        'jwt_expire_at'
     ];
 
     protected function _setName($name) {

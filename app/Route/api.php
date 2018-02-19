@@ -48,7 +48,67 @@ $app->get('/token', function (Request $request, Response $response, array $args)
     $data['uri'] = $request->getUri()->getPath();
 
     $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(200);
+    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
+
+    return $response;
+});
+
+$app->get('/homes', function (Request $request, Response $response, array $args) {
+    $homes = DatabaseHelper::homeTableRegistry();
+    $allHomes = $homes->find()->all();
+
+    $data['status'] = ErrorHandler::STATUS_SUCCESS;
+    $data['data']['count'] = $allHomes->count();
+    $data['data']['homes'] = $allHomes->toArray();
+    $data['uri'] = $request->getUri()->getPath();
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
+
+    return $response;
+});
+
+$app->get('/rooms', function (Request $request, Response $response, array $args) {
+    $rooms = DatabaseHelper::roomTableRegistry();
+    $allRooms = $rooms->find()->all();
+
+    $data['status'] = ErrorHandler::STATUS_SUCCESS;
+    $data['data']['count'] = $allRooms->count();
+    $data['data']['rooms'] = $allRooms->toArray();
+    $data['uri'] = $request->getUri()->getPath();
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
+
+    return $response;
+});
+
+$app->get('/devices', function (Request $request, Response $response, array $args) {
+    $devices = DatabaseHelper::deviceTableRegistry();
+    $allDevices = $devices->find()->all();
+
+    $data['status'] = ErrorHandler::STATUS_SUCCESS;
+    $data['data']['count'] = $allDevices->count();
+    $data['data']['devices'] = $allDevices->toArray();
+    $data['uri'] = $request->getUri()->getPath();
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
+
+    return $response;
+});
+
+$app->get('/units', function (Request $request, Response $response, array $args) {
+    $units = DatabaseHelper::unitTableRegistry();
+    $allUnits = $units->find()->all();
+
+    $data['status'] = ErrorHandler::STATUS_SUCCESS;
+    $data['data']['count'] = $allUnits->count();
+    $data['data']['units'] = $allUnits->toArray();
+    $data['uri'] = $request->getUri()->getPath();
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
 
     return $response;
 });
