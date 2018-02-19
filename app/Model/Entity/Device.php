@@ -35,4 +35,8 @@ class Device extends Entity {
         return $this->modified->format('Y-m-d H:i:s');
     }
 
+    protected function _getJwtExpireAtFormat() {
+        return $this->created->format('Y-m-d H:i:s');
+    }
+
 }

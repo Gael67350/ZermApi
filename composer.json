@@ -6,7 +6,10 @@
         "slim/slim": "^3.9",
         "tuupola/slim-jwt-auth": "^2.3",
         "cakephp/orm": "^3.5",
-        "blake-gardner/mac-address": "^2.1"
+        "blake-gardner/mac-address": "^2.1",
+        "firebase/php-jwt": "^5.0",
+        "nesbot/carbon": "^1.22",
+        "cakephp/i18n": "^3.5"
     },
     "license": "MIT",
     "authors": [

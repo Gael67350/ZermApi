@@ -41,13 +41,19 @@ class ErrorHandler extends AbstractHandler {
         $this->message = $message ?: $this->defaultMessages[$this->status];
     }
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $arguments) {
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, $error) {
+        if ($error instanceof \Exception) {
+            $this->status = $error->getCode();
+            $this->message = $this->defaultMessages[$this->status];
+        }
+
         $data['status'] = $this->status;
         $data['message'] = $this->message;
         $data['uri'] = $request->getUri()->getPath();
         return $response
-            ->withStatus($this->status)
-            ->write(json_encode($data));
+            ->withHeader("Content-Type", "application/json")
+            ->write(json_encode($data, JSON_UNESCAPED_SLASHES))
+            ->withStatus($this->status);
     }
 
 }

@@ -1,4 +1,5 @@
 /vendor/
 /*.iml
 /.idea/
-/Config/config.php
+/app/Config/config.php
+/certs/*.pem

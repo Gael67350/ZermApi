@@ -61,6 +61,7 @@ class DevicesTable extends Table {
             ->notEmpty('macAddress', 'A MAC address must be filled')
             ->dateTime('created', 'Y-m-d H:i:s', 'This date is invalid')
             ->dateTime('modified', 'Y-m-d H:i:s', 'This date is invalid')
+            ->dateTime('jwt_expire_at', 'Y-m-d H:i:s', 'This date is invalid')
             ->requirePresence('modified', 'update', 'A modification date must be specified')
             ->notEmpty('modified', 'A modification date must be specified');
 

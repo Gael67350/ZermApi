@@ -8,15 +8,16 @@ return [
     ],
 
     'database' => [
+        'driver' => 'Cake\Database\Driver\Mysql',
         'host' => 'localhost',
         'username' => 'root',
-        'password' => '',
-        'schema' => 'my_api'
+        'password' => 'root',
+        'schema' => 'zermbox'
     ],
 
     'auth' => [
-        'public_key' => 'jwt_public.pem',
-        'private_key' => 'jwt_private.pem'
+        'public_key' => 'jwtrsa_zermapi_cert.pem',
+        'private_key' => 'jwtrsa_zermapi_private.pem'
     ],
 
 ];

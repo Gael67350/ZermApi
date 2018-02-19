@@ -8,10 +8,11 @@ return [
     ],
 
     'database' => [
+        'driver' => 'Cake\Database\Driver\Mysql',
         'host' => 'localhost',
         'username' => 'root',
         'password' => '',
-        'schema' => 'my_api'
+        'schema' => 'zermbox'
     ],
 
     'auth' => [
