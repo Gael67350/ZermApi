@@ -44,7 +44,7 @@ class ErrorHandler extends AbstractHandler {
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, $error) {
         if ($error instanceof \Exception) {
             $this->status = $error->getCode();
-            $this->message = $this->defaultMessages[$this->status];
+            $this->message = $error->getMessage() ?: $this->defaultMessages[$this->status];
         }
 
         $data['status'] = $this->status;
