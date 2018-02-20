@@ -85,12 +85,87 @@ $app->get('/rooms', function (Request $request, Response $response, array $args)
 
 $app->get('/devices', function (Request $request, Response $response, array $args) {
     $devices = DatabaseHelper::deviceTableRegistry();
-    $allDevices = $devices->find()->all();
+    $params = $request->getQueryParams();
 
     $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['data']['count'] = $allDevices->count();
-    $data['data']['devices'] = $allDevices->toArray();
     $data['uri'] = $request->getUri()->getPath();
+
+    if (!empty($params['device_uuid'])) {
+        $device = $devices->findByUuid($params['device_uuid'])->first();
+
+        if (empty($device)) {
+            throw new Exception("Device not found", ErrorHandler::STATUS_NOT_FOUND);
+        }
+
+        $data['data']['devices'] = $device->toArray();
+    } else {
+        $allDevices = $devices->find()->all();
+
+        $data['data']['count'] = $allDevices->count();
+        $data['data']['devices'] = $allDevices->toArray();
+    }
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
+
+    return $response;
+});
+
+$app->get('/devices/features', function (Request $request, Response $response, array $args) {
+    $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
+    $params = $request->getQueryParams();
+
+    $data['status'] = ErrorHandler::STATUS_SUCCESS;
+    $data['uri'] = $request->getUri()->getPath();
+
+    if (empty($params['device_uuid'])) {
+        throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
+    }
+
+    if (!empty($params['feature_id'])) {
+        $feature = $deviceFeatures->find()->where(['device_uuid' => $params['device_uuid'], 'deviceFeatures.id' => $params['feature_id']])->contain(['Units'])->first();
+
+        if (empty($feature)) {
+            throw new Exception("Feature not found", ErrorHandler::STATUS_NOT_FOUND);
+        }
+
+        $data['data']['features'] = $feature->toArray();
+    } else {
+        $allFeatures = $deviceFeatures->findByDeviceUuid($params['device_uuid'])->contain(['Units'])->all();
+
+        $data['data']['count'] = $allFeatures->count();
+        $data['data']['features'] = $allFeatures->toArray();
+    }
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
+
+    return $response;
+});
+
+$app->get('/devices/features/states', function (Request $request, Response $response, array $args) {
+    $deviceStates = DatabaseHelper::deviceStateTableRegistry();
+    $params = $request->getQueryParams();
+
+    $data['status'] = ErrorHandler::STATUS_SUCCESS;
+    $data['uri'] = $request->getUri()->getPath();
+
+    if (empty($params['device_uuid']) || empty($params['feature_id'])) {
+        throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
+    }
+
+    $allStates = $deviceStates->findByDeviceFeatureId($params['feature_id'])->where(['device_uuid' => $params['device_uuid']])->contain(['DeviceFeatures'])->all();
+
+    if ($allStates->count() == 0) {
+        throw new Exception("No state found", ErrorHandler::STATUS_NOT_FOUND);
+    }
+
+    foreach ($allStates as $state) {
+        unset($state->device_feature);
+    }
+
+    $data['data']['count'] = $allStates->count();
+    $data['data']['states'] = $allStates;
 
     $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
     $response->withStatus(ErrorHandler::STATUS_SUCCESS);

@@ -15,7 +15,7 @@ class DevicesTable extends Table {
         $this->addBehavior('Timestamp');
 
         $this->belongsTo('Rooms');
-        $this->hasMany('DeviceFeatures');
+        $this->hasMany('DeviceFeatures')->setForeignKey('device_uuid');
     }
 
     public function validationDefault(Validator $validator) {
