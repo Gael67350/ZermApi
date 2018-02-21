@@ -10,6 +10,7 @@ use Slim\Handlers\AbstractHandler;
 class ErrorHandler extends AbstractHandler {
 
     const STATUS_SUCCESS = 200;
+    const STATUS_CREATED = 201;
 
     const STATUS_BAD_REQUEST = 400;
     const STATUS_UNAUTHORIZED = 401;
@@ -22,6 +23,7 @@ class ErrorHandler extends AbstractHandler {
 
     private $defaultMessages = [
         self::STATUS_SUCCESS => "OK",
+        self::STATUS_CREATED => "OK",
 
         self::STATUS_BAD_REQUEST => "Bad request",
         self::STATUS_UNAUTHORIZED => "Authentication is required to access to this resource",

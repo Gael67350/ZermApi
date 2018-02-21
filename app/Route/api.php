@@ -154,7 +154,7 @@ $app->get('/devices/features/states', function (Request $request, Response $resp
         throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
     }
 
-    $allStates = $deviceStates->findByDeviceFeatureId($params['feature_id'])->where(['device_uuid' => $params['device_uuid']])->contain(['DeviceFeatures'])->all();
+    $allStates = $deviceStates->findByDeviceFeatureId($params['feature_id'])->where(['device_uuid' => $params['device_uuid']])->contain(['DeviceFeatures'])->order(['created' => 'DESC'])->limit(10)->all();
 
     if ($allStates->count() == 0) {
         throw new Exception("No state found", ErrorHandler::STATUS_NOT_FOUND);
@@ -184,6 +184,79 @@ $app->get('/units', function (Request $request, Response $response, array $args)
 
     $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
     $response->withStatus(ErrorHandler::STATUS_SUCCESS);
+
+    return $response;
+});
+
+$app->put('/devices/features/states', function (Request $request, Response $response, array $args) {
+    $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
+    $deviceStates = DatabaseHelper::deviceStateTableRegistry();
+    $params = $request->getQueryParams();
+
+    $data['status'] = ErrorHandler::STATUS_CREATED;
+    $data['uri'] = $request->getUri()->getPath();
+
+    if (empty($params['device_uuid'] || empty($params['feature_id']))) {
+        throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
+    }
+
+    $feature = $deviceFeatures->findById($params['feature_id'])->where(['device_uuid' => $params['device_uuid'], 'sensor' => false])->first();
+
+    if (empty($feature)) {
+        throw new Exception("No updatable feature found", ErrorHandler::STATUS_NOT_FOUND);
+    }
+
+    $newState = $deviceStates->newEntity();
+    $newState->value = $params['value'] ?: $feature->default_value;
+    $newState->device_feature_id = $params['feature_id'];
+
+    if (!$deviceStates->save($newState)) {
+        throw new Exception(null, ErrorHandler::STATUS_INTERNAL_SERVER_ERROR);
+    }
+
+    $data['data'] = $newState->toArray();
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_CREATED);
+
+    return $response;
+});
+
+$app->put('/devices/states', function (Request $request, Response $response, array $args) {
+    $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
+    $deviceStates = DatabaseHelper::deviceStateTableRegistry();
+    $params = $request->getQueryParams();
+
+    $data['status'] = ErrorHandler::STATUS_CREATED;
+    $data['uri'] = $request->getUri()->getPath();
+
+    if (empty($params['device_uuid'])) {
+        throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
+    }
+
+    $features = $deviceFeatures->findByDeviceUuid($params['device_uuid'])->where(['sensor' => false])->all();
+
+    if (empty($features)) {
+        throw new Exception("No updatable feature found", ErrorHandler::STATUS_NOT_FOUND);
+    }
+
+    $index = 0;
+
+    foreach ($features as $feature) {
+        $newState = $deviceStates->newEntity();
+        $newState->value = $params['value'] ?: $feature->default_value;
+        $newState->device_feature_id = $feature->id;
+
+        if (!$deviceStates->save($newState)) {
+            throw new Exception(null, ErrorHandler::STATUS_INTERNAL_SERVER_ERROR);
+        }
+
+        $data['data'][$index] = $newState->toArray();
+        $index++;
+    }
+
+    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
+    $response->withStatus(ErrorHandler::STATUS_CREATED);
 
     return $response;
 });
