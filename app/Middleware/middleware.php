@@ -1,6 +1,7 @@
 <?php
 
 use \App\Handler\ErrorHandler;
+use \App\Middleware\FormatAPIResponseMiddleware;
 use \App\Middleware\SetContentTypeToJsonMiddleware;
 use \Slim\Middleware\JwtAuthentication;
 
@@ -16,3 +17,5 @@ $app->add(new JwtAuthentication([
 ]));
 
 $app->add(new SetContentTypeToJsonMiddleware());
+
+$app->add(new FormatAPIResponseMiddleware());

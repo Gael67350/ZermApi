@@ -2,9 +2,9 @@
 
 use \App\Handler\ErrorHandler;
 use \App\Helper\DatabaseHelper;
+use \App\Http\Response;
 use Carbon\Carbon;
 use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
 
 $app->get('/token', function (Request $request, Response $response, array $args) {
     global $config;
@@ -22,14 +22,14 @@ $app->get('/token', function (Request $request, Response $response, array $args)
     }
 
     if (empty($device->jwt_expire_at) || $device->jwt_expire_at < Carbon::now()) {
-        $data['message'] = 'Token renewal';
+        $response->withMessage('Token renewed');
         $device->jwt_expire_at = Carbon::now()->addDay();
 
         if (!$devices->save($device)) {
             throw new Exception(null, ErrorHandler::STATUS_INTERNAL_SERVER_ERROR);
         }
     } else {
-        $data['message'] = 'No need to renew the token';
+        $response->withMessage('No need to renew the token');
     }
 
     $iat = Carbon::createFromTimestamp($device->jwt_expire_at->timestamp)->subDay();
@@ -43,52 +43,33 @@ $app->get('/token', function (Request $request, Response $response, array $args)
         ]
     ];
 
-    $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['data']['token'] = \Firebase\JWT\JWT::encode($payload, $config['auth']['private_key'], 'RS256');
-    $data['uri'] = $request->getUri()->getPath();
-
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
-
-    return $response;
+    $data['token'] = \Firebase\JWT\JWT::encode($payload, $config['auth']['private_key'], 'RS256');
+    return $response->withData($data);
 });
 
 $app->get('/homes', function (Request $request, Response $response, array $args) {
     $homes = DatabaseHelper::homeTableRegistry();
     $allHomes = $homes->find()->all();
 
-    $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['data']['count'] = $allHomes->count();
-    $data['data']['homes'] = $allHomes->toArray();
-    $data['uri'] = $request->getUri()->getPath();
+    $data['count'] = $allHomes->count();
+    $data['homes'] = $allHomes->toArray();
 
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
-
-    return $response;
+    return $response->withData($data);
 });
 
 $app->get('/rooms', function (Request $request, Response $response, array $args) {
     $rooms = DatabaseHelper::roomTableRegistry();
     $allRooms = $rooms->find()->all();
 
-    $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['data']['count'] = $allRooms->count();
-    $data['data']['rooms'] = $allRooms->toArray();
-    $data['uri'] = $request->getUri()->getPath();
+    $data['count'] = $allRooms->count();
+    $data['rooms'] = $allRooms->toArray();
 
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
-
-    return $response;
+    return $response->withData($data);
 });
 
 $app->get('/devices', function (Request $request, Response $response, array $args) {
     $devices = DatabaseHelper::deviceTableRegistry();
     $params = $request->getQueryParams();
-
-    $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['uri'] = $request->getUri()->getPath();
 
     if (!empty($params['device_uuid'])) {
         $device = $devices->findByUuid($params['device_uuid'])->first();
@@ -97,26 +78,20 @@ $app->get('/devices', function (Request $request, Response $response, array $arg
             throw new Exception("Device not found", ErrorHandler::STATUS_NOT_FOUND);
         }
 
-        $data['data']['devices'] = $device->toArray();
+        $data['devices'] = $device->toArray();
     } else {
         $allDevices = $devices->find()->all();
 
-        $data['data']['count'] = $allDevices->count();
-        $data['data']['devices'] = $allDevices->toArray();
+        $data['count'] = $allDevices->count();
+        $data['devices'] = $allDevices->toArray();
     }
 
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
-
-    return $response;
+    return $response->withData($data);
 });
 
 $app->get('/devices/features', function (Request $request, Response $response, array $args) {
     $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
     $params = $request->getQueryParams();
-
-    $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['uri'] = $request->getUri()->getPath();
 
     if (empty($params['device_uuid'])) {
         throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
@@ -129,26 +104,20 @@ $app->get('/devices/features', function (Request $request, Response $response, a
             throw new Exception("Feature not found", ErrorHandler::STATUS_NOT_FOUND);
         }
 
-        $data['data']['features'] = $feature->toArray();
+        $data['features'] = $feature->toArray();
     } else {
         $allFeatures = $deviceFeatures->findByDeviceUuid($params['device_uuid'])->contain(['Units'])->all();
 
-        $data['data']['count'] = $allFeatures->count();
-        $data['data']['features'] = $allFeatures->toArray();
+        $data['count'] = $allFeatures->count();
+        $data['features'] = $allFeatures->toArray();
     }
 
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
-
-    return $response;
+    return $response->withData($data);
 });
 
 $app->get('/devices/features/states', function (Request $request, Response $response, array $args) {
     $deviceStates = DatabaseHelper::deviceStateTableRegistry();
     $params = $request->getQueryParams();
-
-    $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['uri'] = $request->getUri()->getPath();
 
     if (empty($params['device_uuid']) || empty($params['feature_id'])) {
         throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
@@ -164,37 +133,26 @@ $app->get('/devices/features/states', function (Request $request, Response $resp
         unset($state->device_feature);
     }
 
-    $data['data']['count'] = $allStates->count();
-    $data['data']['states'] = $allStates;
+    $data['count'] = $allStates->count();
+    $data['states'] = $allStates;
 
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
-
-    return $response;
+    return $response->withData($data);
 });
 
 $app->get('/units', function (Request $request, Response $response, array $args) {
     $units = DatabaseHelper::unitTableRegistry();
     $allUnits = $units->find()->all();
 
-    $data['status'] = ErrorHandler::STATUS_SUCCESS;
-    $data['data']['count'] = $allUnits->count();
-    $data['data']['units'] = $allUnits->toArray();
-    $data['uri'] = $request->getUri()->getPath();
+    $data['count'] = $allUnits->count();
+    $data['units'] = $allUnits->toArray();
 
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_SUCCESS);
-
-    return $response;
+    return $response->withData($data);
 });
 
 $app->put('/devices/features/states', function (Request $request, Response $response, array $args) {
     $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
     $deviceStates = DatabaseHelper::deviceStateTableRegistry();
     $params = $request->getQueryParams();
-
-    $data['status'] = ErrorHandler::STATUS_CREATED;
-    $data['uri'] = $request->getUri()->getPath();
 
     if (empty($params['device_uuid'] || empty($params['feature_id']))) {
         throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
@@ -214,12 +172,8 @@ $app->put('/devices/features/states', function (Request $request, Response $resp
         throw new Exception(null, ErrorHandler::STATUS_INTERNAL_SERVER_ERROR);
     }
 
-    $data['data'] = $newState->toArray();
-
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_CREATED);
-
-    return $response;
+    $data = $newState->toArray();
+    return $response->withData($data)->withStatus(ErrorHandler::STATUS_CREATED);
 });
 
 $app->put('/devices/states', function (Request $request, Response $response, array $args) {
@@ -227,36 +181,31 @@ $app->put('/devices/states', function (Request $request, Response $response, arr
     $deviceStates = DatabaseHelper::deviceStateTableRegistry();
     $params = $request->getQueryParams();
 
-    $data['status'] = ErrorHandler::STATUS_CREATED;
-    $data['uri'] = $request->getUri()->getPath();
-
     if (empty($params['device_uuid'])) {
         throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
     }
 
     $features = $deviceFeatures->findByDeviceUuid($params['device_uuid'])->where(['sensor' => false])->all();
 
-    if (empty($features)) {
+    if ($features->count() == 0) {
         throw new Exception("No updatable feature found", ErrorHandler::STATUS_NOT_FOUND);
     }
 
+    $data = [];
     $index = 0;
 
     foreach ($features as $feature) {
         $newState = $deviceStates->newEntity();
-        $newState->value = $params['value'] ?: $feature->default_value;
+        $newState->value = $feature->default_value;
         $newState->device_feature_id = $feature->id;
 
         if (!$deviceStates->save($newState)) {
             throw new Exception(null, ErrorHandler::STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        $data['data'][$index] = $newState->toArray();
+        $data[$index] = $newState->toArray();
         $index++;
     }
 
-    $response->getBody()->write(json_encode($data, JSON_UNESCAPED_SLASHES));
-    $response->withStatus(ErrorHandler::STATUS_CREATED);
-
-    return $response;
+    return $response->withData($data)->withStatus(ErrorHandler::STATUS_CREATED);
 });

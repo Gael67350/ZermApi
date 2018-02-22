@@ -14,7 +14,8 @@ $app = new Slim\App([
         "displayErrorDetails" => $config['app']['debug'],
         "debug" => $config['app']['debug'],
 
-        "addContentLengthHeader" => false
+        "addContentLengthHeader" => false,
+        "determineRouteBeforeAppMiddleware" => true,
     ]
 ]);
 
@@ -26,6 +27,8 @@ $app = new Slim\App([
     'username' => $config['database']['username'],
     'password' => $config['database']['password']
 ]);
+
+require __DIR__ . "/app/Http/http.php";
 
 require __DIR__ . "/app/Handler/error.php";
 
