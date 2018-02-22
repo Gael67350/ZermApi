@@ -16,6 +16,7 @@ class ErrorHandler extends AbstractHandler {
     const STATUS_UNAUTHORIZED = 401;
     const STATUS_FORBIDDEN = 403;
     const STATUS_NOT_FOUND = 404;
+    const STATUS_NOT_ALLOWED = 405;
     const STATUS_IM_A_TEAPOT = 418;
     const STATUS_TOO_MANY_REQUESTS = 429;
 
@@ -28,6 +29,7 @@ class ErrorHandler extends AbstractHandler {
         self::STATUS_BAD_REQUEST => "Bad request",
         self::STATUS_UNAUTHORIZED => "Authentication is required to access to this resource",
         self::STATUS_FORBIDDEN => "Access forbidden",
+        self::STATUS_NOT_ALLOWED => "Method Not Allowed",
         self::STATUS_NOT_FOUND => "Resource not found",
         self::STATUS_IM_A_TEAPOT => "I'm a teapot",
         self::STATUS_TOO_MANY_REQUESTS => "Too many request",
@@ -43,10 +45,10 @@ class ErrorHandler extends AbstractHandler {
         $this->message = $message ?: $this->defaultMessages[$this->status];
     }
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, $error) {
-        if ($error instanceof \Exception) {
-            $this->status = $error->getCode();
-            $this->message = $error->getMessage() ?: $this->defaultMessages[$this->status];
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, $args) {
+        if ($args instanceof \Exception) {
+            $this->status = $args->getCode();
+            $this->message = $args->getMessage() ?: $this->defaultMessages[$this->status];
         }
 
         $data['status'] = $this->status;

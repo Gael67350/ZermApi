@@ -15,3 +15,7 @@ $container['phpErrorHandler'] = function () {
 $container['notFoundHandler'] = function () {
     return new ErrorHandler(ErrorHandler::STATUS_NOT_FOUND);
 };
+
+$container['notAllowedHandler'] = function () {
+    return new ErrorHandler(ErrorHandler::STATUS_NOT_ALLOWED);
+};
