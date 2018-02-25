@@ -221,6 +221,10 @@ $app->put('/devices/{uuid}/features/{feature_id}/states', function (Request $req
         throw new Exception("No updatable feature found", ErrorHandler::STATUS_NOT_FOUND);
     }
 
+    if ($params['value'] < $feature->minValue || $params['value'] > $feature->maxValue) {
+        throw new Exception("The passed value is not valid", ErrorHandler::STATUS_BAD_REQUEST);
+    }
+
     $newState = $deviceStates->newEntity();
     $newState->value = $params['value'] ?: $feature->default_value;
     $newState->device_feature_id = $args['feature_id'];
