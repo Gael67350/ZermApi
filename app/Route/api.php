@@ -134,7 +134,7 @@ $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request,
     }
 
     if (!empty($args['feature_id'])) {
-        $feature = $deviceFeatures->find()->where(['device_uuid' => $args['uuid'], 'deviceFeatures.id' => $args['feature_id']])->contain(['Units'])->first();
+        $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
 
         if (empty($feature)) {
             throw new Exception("Feature not found", ErrorHandler::STATUS_NOT_FOUND);
