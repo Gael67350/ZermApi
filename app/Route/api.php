@@ -127,6 +127,7 @@ $app->get('/devices[/{uuid}]', function (Request $request, Response $response, a
 
 $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request, Response $response, array $args) {
     $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
+    $params = $request->getQueryParams();
 
     if (empty($args['uuid'])) {
         throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
@@ -141,7 +142,12 @@ $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request,
 
         $data['features'] = $feature->toArray();
     } else {
-        $allFeatures = $deviceFeatures->findByDeviceUuid($args['uuid'])->contain(['Units'])->all();
+        if (isset($params['sensor'])) {
+            $sensor = (boolean)$params['sensor'];
+            $allFeatures = $deviceFeatures->findByDeviceUuid($args['uuid'])->where(['sensor' => $sensor])->contain(['Units'])->all();
+        } else {
+            $allFeatures = $deviceFeatures->findByDeviceUuid($args['uuid'])->contain(['Units'])->all();
+        }
 
         $data['count'] = $allFeatures->count();
         $data['features'] = $allFeatures->toArray();
