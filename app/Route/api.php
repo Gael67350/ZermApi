@@ -162,6 +162,7 @@ $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request,
 
 $app->get('/devices/{uuid}/features/{feature_id}/states[/{state_id}]', function (Request $request, Response $response, array $args) {
     $deviceStates = DatabaseHelper::deviceStateTableRegistry();
+    $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
     $params = $request->getQueryParams();
     $limit = $params['limit'] ?: 10;
 
@@ -178,6 +179,14 @@ $app->get('/devices/{uuid}/features/{feature_id}/states[/{state_id}]', function 
 
         $data['states'] = $state->toArray();
     } else {
+        if (isset($params['logical']) && (boolean)$params['logical']) {
+            $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid']])->first();
+
+            if (!empty($feature)) {
+                $args['feature_id'] = $feature->id;
+            }
+        }
+
         $allStates = $deviceStates->findByDeviceFeatureId($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['DeviceFeatures'])->order(['created' => 'DESC'])->limit($limit)->all();
 
         if ($allStates->count() == 0) {
