@@ -35,6 +35,9 @@ class DeviceFeaturesTable extends Table {
         $validator
             ->numeric('id', 'An ID must be an integer')
             ->allowEmpty('id', 'create')
+            ->numeric('logical_id', 'A logical ID must be an integer between 1 and 255')
+            ->range('logical_id', [1, 255], 'A logical ID must be an integer between 1 and 255')
+            ->notEmpty('logical_id', 'A logical ID must be filled')
             ->alphaNumeric('name', 'A name must consist only of letters and numbers')
             ->lengthBetween('name', [4, 45], 'A name must be between 4 and 45 characters long')
             ->add('name', [

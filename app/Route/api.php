@@ -134,7 +134,11 @@ $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request,
     }
 
     if (!empty($args['feature_id'])) {
-        $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
+        if (isset($params['logical']) && (boolean)$params['logical']) {
+            $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
+        } else {
+            $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
+        }
 
         if (empty($feature)) {
             throw new Exception("Feature not found", ErrorHandler::STATUS_NOT_FOUND);
@@ -221,7 +225,11 @@ $app->put('/devices/{uuid}/features/{feature_id}/states', function (Request $req
         throw new Exception(null, ErrorHandler::STATUS_BAD_REQUEST);
     }
 
-    $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid'], 'sensor' => false])->first();
+    if (isset($params['logical']) && (boolean)$params['logical']) {
+        $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid'], 'sensor' => false])->contain(['Units'])->first();
+    } else {
+        $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid'], 'sensor' => false])->contain(['Units'])->first();
+    }
 
     if (empty($feature)) {
         throw new Exception("No updatable feature found", ErrorHandler::STATUS_NOT_FOUND);
@@ -233,7 +241,7 @@ $app->put('/devices/{uuid}/features/{feature_id}/states', function (Request $req
 
     $newState = $deviceStates->newEntity();
     $newState->value = $params['value'] ?: $feature->default_value;
-    $newState->device_feature_id = $args['feature_id'];
+    $newState->device_feature_id = $feature->id;
 
     if (!$deviceStates->save($newState)) {
         throw new Exception(null, ErrorHandler::STATUS_INTERNAL_SERVER_ERROR);
