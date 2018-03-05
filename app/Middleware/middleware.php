@@ -20,6 +20,12 @@ use App\Middleware\FormatAPIResponseMiddleware;
 use App\Middleware\SetContentTypeToJsonMiddleware;
 use Slim\Middleware\JwtAuthentication;
 
+$container = $app->getContainer();
+
+$container["jwt"] = function ($container) {
+    return new StdClass;
+};
+
 $app->add(new JwtAuthentication([
     'path' => '/',
     'passthrough' => '/token',
@@ -28,7 +34,10 @@ $app->add(new JwtAuthentication([
     'algorithm' => 'RS256',
     'secure' => !$config['app']['debug'],
 
-    'error' => new ErrorHandler(ErrorHandler::STATUS_UNAUTHORIZED)
+    'error' => new ErrorHandler(ErrorHandler::STATUS_UNAUTHORIZED),
+    'callback' => function ($request, $response, $arguments) use ($container) {
+        $container["jwt"] = $arguments["decoded"];
+    }
 ]));
 
 $app->add(new SetContentTypeToJsonMiddleware());

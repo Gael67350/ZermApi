@@ -235,9 +235,17 @@ $app->put('/devices/{uuid}/features/{feature_id}/states', function (Request $req
     }
 
     if (isset($params['logical']) && (boolean)$params['logical']) {
-        $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid'], 'sensor' => false])->contain(['Units'])->first();
+        if ($this->jwt->device->uuid == $args['uuid']) {
+            $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
+        } else {
+            $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid'], 'sensor' => false])->contain(['Units'])->first();
+        }
     } else {
-        $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid'], 'sensor' => false])->contain(['Units'])->first();
+        if ($this->jwt->device->uuid == $args['uuid']) {
+            $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
+        } else {
+            $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid'], 'sensor' => false])->contain(['Units'])->first();
+        }
     }
 
     if (empty($feature)) {
