@@ -135,26 +135,42 @@ $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request,
 
     if (!empty($args['feature_id'])) {
         if (isset($params['logical']) && (boolean)$params['logical']) {
-            $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
+            $feature = $deviceFeatures->findByLogicalId($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units', 'DeviceStates' => function ($q) {
+                return $q->order(['created' => 'DESC']);
+            }])->first();
         } else {
-            $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units'])->first();
+            $feature = $deviceFeatures->findById($args['feature_id'])->where(['device_uuid' => $args['uuid']])->contain(['Units', 'DeviceStates' => function ($q) {
+                return $q->order(['created' => 'DESC']);
+            }])->first();
         }
 
         if (empty($feature)) {
             throw new Exception("Feature not found", ErrorHandler::STATUS_NOT_FOUND);
         }
 
+        $feature->currentValue = $feature->device_states[0]->value;
+        unset($feature->device_states);
+
         $data['features'] = $feature->toArray();
     } else {
         if (isset($params['sensor'])) {
             $sensor = (boolean)$params['sensor'];
-            $allFeatures = $deviceFeatures->findByDeviceUuid($args['uuid'])->where(['sensor' => $sensor])->contain(['Units'])->all();
+            $allFeatures = $deviceFeatures->findByDeviceUuid($args['uuid'])->where(['sensor' => $sensor])->contain(['Units', 'DeviceStates' => function ($q) {
+                return $q->order(['created' => 'DESC']);
+            }])->all();
         } else {
-            $allFeatures = $deviceFeatures->findByDeviceUuid($args['uuid'])->contain(['Units'])->all();
+            $allFeatures = $deviceFeatures->findByDeviceUuid($args['uuid'])->contain(['Units', 'DeviceStates' => function ($q) {
+                return $q->order(['created' => 'DESC']);
+            }])->all();
         }
 
         $data['count'] = $allFeatures->count();
         $data['features'] = $allFeatures->toArray();
+
+        foreach ($allFeatures as $feature) {
+            $feature->currentValue = $feature->device_states[0]->value;
+            unset($feature->device_states);
+        }
     }
 
     return $response->withData($data);
