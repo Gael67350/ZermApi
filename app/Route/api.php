@@ -21,6 +21,88 @@ use App\Http\Response;
 use Carbon\Carbon;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+/**
+ * @SWG\Swagger(
+ *      host="api.zermthings.fr",
+ *      schemes={"https"},
+ *      produces={"application/json"},
+ *      consumes={"application/json"},
+ *      @SWG\Info(
+ *          title="Zermthings API",
+ *          version="1.0",
+ *          description="An API for ZermThings domotic project",
+ *          @SWG\Contact(
+ *              email="contact@zermthings.fr"
+ *          ),
+ *          @SWG\License(
+ *              name="MIT License",
+ *              url="https://opensource.org/licenses/mit-license.php"
+ *          )
+ *      )
+ * )
+ *
+ * @SWG\Tag(
+ *      name="Authentication",
+ *      description="Everything about authentication",
+ * )
+ *
+ * @SWG\Tag(
+ *      name="Homes",
+ * )
+ *
+ * @SWG\Tag(
+ *      name="Rooms",
+ * )
+ *
+ * @SWG\Tag(
+ *      name="Devices",
+ * )
+ *
+ * @SWG\Tag(
+ *      name="Units",
+ * )
+ */
+
+/**
+ * @SWG\Get(
+ *     path="/token",
+ *     description="Allows authentication of connected devices to the API",
+ *     operationId="auth",
+ *     tags={"Authentication"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="query",
+ *          description="The unique identifier assigned to a device",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *     @SWG\Parameter(
+ *          name="secret",
+ *          in="query",
+ *          description="The secret token assigned to a device",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="JWT token successfully delivered"
+ *      ),
+ *     @SWG\Response(
+ *          response=400,
+ *          description="Invalid parameters",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      ),
+ *     @SWG\Response(
+ *          response="default",
+ *          description="Unexpected error",
+ *          @SWG\Schema(
+ *             ref="#/definitions/ErrorModel"
+ *         )
+ *      )
+ * )
+ */
 $app->get('/token', function (Request $request, Response $response, array $args) {
     global $config;
     $devices = DatabaseHelper::deviceTableRegistry();
@@ -62,6 +144,50 @@ $app->get('/token', function (Request $request, Response $response, array $args)
     return $response->withData($data);
 });
 
+/**
+ * @SWG\Get(
+ *     path="/homes",
+ *     description="Returns all the homes from the system",
+ *     operationId="findHomes",
+ *     tags={"Homes"},
+ *     @SWG\Response(
+ *          response=200,
+ *          description="List of homes response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="No home to show",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ *
+ * @SWG\Get(
+ *     path="/homes/{id}",
+ *     description="Returns the home with the specified ID",
+ *     operationId="findHomeById",
+ *     tags={"Homes"},
+ *     @SWG\Parameter(
+ *          name="id",
+ *          in="path",
+ *          description="ID of a home to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="Home response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="Home not found",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *         )
+ *      )
+ * )
+ */
 $app->get('/homes[/{id}]', function (Request $request, Response $response, array $args) {
     $homes = DatabaseHelper::homeTableRegistry();
 
@@ -83,6 +209,50 @@ $app->get('/homes[/{id}]', function (Request $request, Response $response, array
     return $response->withData($data);
 });
 
+/**
+ * @SWG\Get(
+ *     path="/rooms",
+ *     description="Returns all the rooms from the system",
+ *     operationId="findRooms",
+ *     tags={"Rooms"},
+ *     @SWG\Response(
+ *          response=200,
+ *          description="List of rooms response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="No room to show",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      ),
+ * )
+ *
+ * @SWG\Get(
+ *     path="/rooms/{id}",
+ *     description="Returns the room with the specified ID",
+ *     operationId="findRoomById",
+ *     tags={"Rooms"},
+ *     @SWG\Parameter(
+ *          name="id",
+ *          in="path",
+ *          description="ID of a room to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="Room response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="Room not found",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ */
 $app->get('/rooms[/{id}]', function (Request $request, Response $response, array $args) {
     $rooms = DatabaseHelper::roomTableRegistry();
 
@@ -104,6 +274,50 @@ $app->get('/rooms[/{id}]', function (Request $request, Response $response, array
     return $response->withData($data);
 });
 
+/**
+ * @SWG\Get(
+ *     path="/devices",
+ *     description="Returns all the devices from the system",
+ *     operationId="findDevices",
+ *     tags={"Devices"},
+ *     @SWG\Response(
+ *          response=200,
+ *          description="List of devices response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="No device to show",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ *
+ * @SWG\Get(
+ *     path="/devices/{uuid}",
+ *     description="Returns the device with the specified ID",
+ *     operationId="findDeviceByUuid",
+ *     tags={"Devices"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="path",
+ *          description="The unique identifier of a device to fetch",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="Device response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="Device not found",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ */
 $app->get('/devices[/{uuid}]', function (Request $request, Response $response, array $args) {
     $devices = DatabaseHelper::deviceTableRegistry();
 
@@ -125,6 +339,78 @@ $app->get('/devices[/{uuid}]', function (Request $request, Response $response, a
     return $response->withData($data);
 });
 
+/**
+ * @SWG\Get(
+ *     path="/devices/{uuid}/features",
+ *     description="Returns all the features of a device",
+ *     operationId="findDeviceFeatures",
+ *     tags={"Devices"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="path",
+ *          description="The unique identifier of a device to fetch",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *     @SWG\Parameter(
+ *          name="sensor",
+ *          in="query",
+ *          description="Filter the sensors in the results",
+ *          required=false,
+ *          type="boolean"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="List of features response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="No feature to show",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ *
+ * @SWG\Get(
+ *     path="/devices/{uuid}/features/{feature_id}",
+ *     description="Returns all the features of a device with the specified ID",
+ *     operationId="findDeviceFeatureById",
+ *     tags={"Devices"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="path",
+ *          description="The unique identifier of a device to fetch",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *     @SWG\Parameter(
+ *          name="feature_id",
+ *          in="path",
+ *          description="ID of a device feature to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *      @SWG\Parameter(
+ *          name="logical",
+ *          in="query",
+ *          description="Search a device feature by the internal ID of a feature",
+ *          required=false,
+ *          type="integer"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="Feature response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="Feature not found",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ */
 $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request, Response $response, array $args) {
     $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
     $params = $request->getQueryParams();
@@ -176,6 +462,92 @@ $app->get('/devices/{uuid}/features[/{feature_id}]', function (Request $request,
     return $response->withData($data);
 });
 
+/**
+ * @SWG\Get(
+ *     path="/devices/{uuid}/features/{feature_id}/states",
+ *     description="Returns all the states attached to a specific device feature",
+ *     operationId="findDeviceFeatureStates",
+ *     tags={"Devices"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="path",
+ *          description="The unique identifier of a device to fetch",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *      @SWG\Parameter(
+ *          name="feature_id",
+ *          in="path",
+ *          description="ID of a device feature to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *     @SWG\Parameter(
+ *          name="limit",
+ *          in="query",
+ *          description="Set the number of displayed states (10 by default)",
+ *          required=false,
+ *          type="integer"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="List of features response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="No feature to show",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ *
+ * @SWG\Get(
+ *     path="/devices/{uuid}/features/{feature_id}/states/{state_id}",
+ *     description="Retrieve a specific state attached to a device feature",
+ *     operationId="findDeviceFeatureStatesById",
+ *     tags={"Devices"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="path",
+ *          description="The unique identifier of a device to fetch",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *     @SWG\Parameter(
+ *          name="feature_id",
+ *          in="path",
+ *          description="ID of a device feature to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *     @SWG\Parameter(
+ *          name="state_id",
+ *          in="path",
+ *          description="ID of a state to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *      @SWG\Parameter(
+ *          name="logical",
+ *          in="query",
+ *          description="Search a device feature by the internal ID of a feature",
+ *          required=false,
+ *          type="integer"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="Device response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="Device not found",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ */
 $app->get('/devices/{uuid}/features/{feature_id}/states[/{state_id}]', function (Request $request, Response $response, array $args) {
     $deviceStates = DatabaseHelper::deviceStateTableRegistry();
     $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
@@ -220,6 +592,50 @@ $app->get('/devices/{uuid}/features/{feature_id}/states[/{state_id}]', function 
     return $response->withData($data);
 });
 
+/**
+ * @SWG\Get(
+ *     path="/units",
+ *     description="Returns all the units from the system",
+ *     operationId="findUnits",
+ *     tags={"Units"},
+ *     @SWG\Response(
+ *          response=200,
+ *          description="List of units response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="No unit to show",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ *
+ * @SWG\Get(
+ *     path="/units/{id}",
+ *     description="Returns the unit with the specified ID",
+ *     operationId="findUnitById",
+ *     tags={"Units"},
+ *     @SWG\Parameter(
+ *          name="id",
+ *          in="path",
+ *          description="ID of a unit to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *     @SWG\Response(
+ *          response=200,
+ *          description="Unit response"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="Unit not found",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ */
 $app->get('/units[/{id}]', function (Request $request, Response $response, array $args) {
     $units = DatabaseHelper::unitTableRegistry();
 
@@ -241,6 +657,61 @@ $app->get('/units[/{id}]', function (Request $request, Response $response, array
     return $response->withData($data);
 });
 
+/**
+ * @SWG\Put(
+ *     path="/devices/{uuid}/features/{feature_id}/states",
+ *     description="Update the state of a specific feature of a connected device. Note that a feature with sensor type cannot be updated by an other device.",
+ *     operationId="updateDeviceFeatureState",
+ *     tags={"s"},
+ *     tags={"Devices"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="path",
+ *          description="The unique identifier of a device to fetch",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *      @SWG\Parameter(
+ *          name="feature_id",
+ *          in="path",
+ *          description="ID of a device feature to fetch",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *      @SWG\Parameter(
+ *          name="value",
+ *          in="query",
+ *          description="Value of the new feature state",
+ *          required=true,
+ *          type="integer"
+ *      ),
+ *     @SWG\Parameter(
+ *          name="logical",
+ *          in="query",
+ *          description="Search a device feature by the internal ID of a feature",
+ *          required=false,
+ *          type="integer"
+ *      ),
+ *     @SWG\Response(
+ *          response=201,
+ *          description="Device state successfully updated"
+ *      ),
+ *     @SWG\Response(
+ *          response=400,
+ *          description="The value passed is not correct",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      ),
+ *     @SWG\Response(
+ *          response="default",
+ *          description="Unexpected error",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ */
 $app->put('/devices/{uuid}/features/{feature_id}/states', function (Request $request, Response $response, array $args) {
     $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
     $deviceStates = DatabaseHelper::deviceStateTableRegistry();
@@ -273,7 +744,7 @@ $app->put('/devices/{uuid}/features/{feature_id}/states', function (Request $req
     }
 
     $newState = $deviceStates->newEntity();
-    $newState->value = $params['value'] ?: $feature->default_value;
+    $newState->value = $params['value'];
     $newState->device_feature_id = $feature->id;
 
     if (!$deviceStates->save($newState)) {
@@ -284,6 +755,39 @@ $app->put('/devices/{uuid}/features/{feature_id}/states', function (Request $req
     return $response->withData($data)->withStatus(ErrorHandler::STATUS_CREATED);
 });
 
+/**
+ * @SWG\Put(
+ *     path="/devices/{uuid}/states/reset",
+ *     description="Reset the state of a specific connected device",
+ *     operationId="resetDeviceFeatureState",
+ *     tags={"Devices"},
+ *     @SWG\Parameter(
+ *          name="uuid",
+ *          in="path",
+ *          description="The unique identifier of a device to fetch",
+ *          required=true,
+ *          type="string"
+ *      ),
+ *     @SWG\Response(
+ *          response=201,
+ *          description="Device state successfully updated"
+ *      ),
+ *     @SWG\Response(
+ *          response=404,
+ *          description="No updatable feature found",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      ),
+ *     @SWG\Response(
+ *          response="default",
+ *          description="Unexpected error",
+ *          @SWG\Schema(
+ *              ref="#/definitions/ErrorModel"
+ *          )
+ *      )
+ * )
+ */
 $app->put('/devices/{uuid}/states/reset', function (Request $request, Response $response, array $args) {
     $deviceFeatures = DatabaseHelper::deviceFeatureTableRegistry();
     $deviceStates = DatabaseHelper::deviceStateTableRegistry();

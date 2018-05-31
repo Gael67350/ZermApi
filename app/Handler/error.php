@@ -36,3 +36,23 @@ $container['notFoundHandler'] = function () {
 $container['notAllowedHandler'] = function () {
     return new ErrorHandler(ErrorHandler::STATUS_NOT_ALLOWED);
 };
+
+/** @SWG\Definition(
+ *          definition="ErrorModel",
+ *          type="object",
+ *          required={"status", "message", "uri"},
+ *          @SWG\Property(
+ *              property="status",
+ *              type="integer",
+ *              format="int32"
+ *          ),
+ *          @SWG\Property(
+ *              property="message",
+ *              type="string"
+ *          ),
+ *          @SWG\Property(
+ *              property="uri",
+ *              type="string"
+ *          )
+ *  )
+ **/

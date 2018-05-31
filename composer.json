@@ -9,7 +9,8 @@
         "blake-gardner/mac-address": "^2.1",
         "firebase/php-jwt": "^5.0",
         "nesbot/carbon": "^1.22",
-        "cakephp/i18n": "^3.5"
+      "cakephp/i18n": "^3.5",
+      "zircote/swagger-php": "^2.0"
     },
     "license": "MIT",
     "authors": [

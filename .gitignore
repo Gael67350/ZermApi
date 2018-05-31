@@ -3,3 +3,4 @@
 /.idea/
 /app/Config/config.php
 /certs/*.pem
+node_modules/*

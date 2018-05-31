@@ -1,0 +1,372 @@
+swagger: '2.0'
+info:
+  title: Zermthings API
+  description: An API for ZermThings domotic project
+  contact:
+    email: contact@zermthings.fr
+  license:
+    name: MIT License
+    url: 'https://opensource.org/licenses/mit-license.php'
+  version: '1.0'
+host: api.zermthings.fr
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /token:
+    get:
+      tags:
+        - Authentication
+      description: Allows authentication of connected devices to the API
+      operationId: auth
+      parameters:
+        - name: uuid
+          in: query
+          description: The unique identifier assigned to a device
+          required: true
+          type: string
+        - name: secret
+          in: query
+          description: The secret token assigned to a device
+          required: true
+          type: string
+      responses:
+        '200':
+          description: JWT token successfully delivered
+        '400':
+          description: Invalid parameters
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /homes:
+    get:
+      tags:
+        - Homes
+      description: Returns all the homes from the system
+      operationId: findHomes
+      responses:
+        '200':
+          description: List of homes response
+        '404':
+          description: No home to show
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/homes/{id}':
+    get:
+      tags:
+        - Homes
+      description: Returns the home with the specified ID
+      operationId: findHomeById
+      parameters:
+        - name: id
+          in: path
+          description: ID of a home to fetch
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Home response
+        '404':
+          description: Home not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /rooms:
+    get:
+      tags:
+        - Rooms
+      description: Returns all the rooms from the system
+      operationId: findRooms
+      responses:
+        '200':
+          description: List of rooms response
+        '404':
+          description: No room to show
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/rooms/{id}':
+    get:
+      tags:
+        - Rooms
+      description: Returns the room with the specified ID
+      operationId: findRoomById
+      parameters:
+        - name: id
+          in: path
+          description: ID of a room to fetch
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Room response
+        '404':
+          description: Room not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /devices:
+    get:
+      tags:
+        - Devices
+      description: Returns all the devices from the system
+      operationId: findDevices
+      responses:
+        '200':
+          description: List of devices response
+        '404':
+          description: No device to show
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/devices/{uuid}':
+    get:
+      tags:
+        - Devices
+      description: Returns the device with the specified ID
+      operationId: findDeviceByUuid
+      parameters:
+        - name: uuid
+          in: path
+          description: The unique identifier of a device to fetch
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Device response
+        '404':
+          description: Device not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/devices/{uuid}/features':
+    get:
+      tags:
+        - Devices
+      description: Returns all the features of a device
+      operationId: findDeviceFeatures
+      parameters:
+        - name: uuid
+          in: path
+          description: The unique identifier of a device to fetch
+          required: true
+          type: string
+        - name: sensor
+          in: query
+          description: Filter the sensors in the results
+          required: false
+          type: boolean
+      responses:
+        '200':
+          description: List of features response
+        '404':
+          description: No feature to show
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/devices/{uuid}/features/{feature_id}':
+    get:
+      tags:
+        - Devices
+      description: Returns all the features of a device with the specified ID
+      operationId: findDeviceFeatureById
+      parameters:
+        - name: uuid
+          in: path
+          description: The unique identifier of a device to fetch
+          required: true
+          type: string
+        - name: feature_id
+          in: path
+          description: ID of a device feature to fetch
+          required: true
+          type: integer
+        - name: logical
+          in: query
+          description: Search a device feature by the internal ID of a feature
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: Feature response
+        '404':
+          description: Feature not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/devices/{uuid}/features/{feature_id}/states':
+    get:
+      tags:
+        - Devices
+      description: Returns all the states attached to a specific device feature
+      operationId: findDeviceFeatureStates
+      parameters:
+        - name: uuid
+          in: path
+          description: The unique identifier of a device to fetch
+          required: true
+          type: string
+        - name: feature_id
+          in: path
+          description: ID of a device feature to fetch
+          required: true
+          type: integer
+        - name: limit
+          in: query
+          description: Set the number of displayed states (10 by default)
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: List of features response
+        '404':
+          description: No feature to show
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    put:
+      tags:
+        - Devices
+      description: Update the state of a specific feature of a connected device. Note that a feature with sensor type cannot be updated by an other device.
+      operationId: updateDeviceFeatureState
+      parameters:
+        - name: uuid
+          in: path
+          description: The unique identifier of a device to fetch
+          required: true
+          type: string
+        - name: feature_id
+          in: path
+          description: ID of a device feature to fetch
+          required: true
+          type: integer
+        - name: value
+          in: query
+          description: Value of the new feature state
+          required: true
+          type: integer
+        - name: logical
+          in: query
+          description: Search a device feature by the internal ID of a feature
+          required: false
+          type: integer
+      responses:
+        '201':
+          description: Device state successfully updated
+        '400':
+          description: The value passed is not correct
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/devices/{uuid}/features/{feature_id}/states/{state_id}':
+    get:
+      tags:
+        - Devices
+      description: Retrieve a specific state attached to a device feature
+      operationId: findDeviceFeatureStatesById
+      parameters:
+        - name: uuid
+          in: path
+          description: The unique identifier of a device to fetch
+          required: true
+          type: string
+        - name: feature_id
+          in: path
+          description: ID of a device feature to fetch
+          required: true
+          type: integer
+        - name: state_id
+          in: path
+          description: ID of a state to fetch
+          required: true
+          type: integer
+        - name: logical
+          in: query
+          description: Search a device feature by the internal ID of a feature
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: Device response
+        '404':
+          description: Device not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /units:
+    get:
+      tags:
+        - Units
+      description: Returns all the units from the system
+      operationId: findUnits
+      responses:
+        '200':
+          description: List of units response
+        '404':
+          description: No unit to show
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/units/{id}':
+    get:
+      tags:
+        - Units
+      description: Returns the unit with the specified ID
+      operationId: findUnitById
+      parameters:
+        - name: id
+          in: path
+          description: ID of a unit to fetch
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Unit response
+        '404':
+          description: Unit not found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  '/devices/{uuid}/states/reset':
+    put:
+      tags:
+        - Devices
+      description: Reset the state of a specific connected device
+      operationId: resetDeviceFeatureState
+      parameters:
+        - name: uuid
+          in: path
+          description: The unique identifier of a device to fetch
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Device state successfully updated
+        '404':
+          description: No updatable feature found
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+definitions:
+  ErrorModel:
+    required:
+      - status
+      - message
+      - uri
+    properties:
+      status:
+        type: integer
+        format: int32
+      message:
+        type: string
+      uri:
+        type: string
+    type: object
+tags:
+  - name: Authentication
+    description: Everything about authentication
+  - name: Homes
+  - name: Rooms
+  - name: Devices
+  - name: Units
